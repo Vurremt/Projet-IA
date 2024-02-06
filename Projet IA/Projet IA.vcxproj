@@ -127,12 +127,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="IA\Couche.cpp" />
+    <ClCompile Include="IA\Model.cpp" />
+    <ClCompile Include="IA\Neurone.cpp" />
     <ClCompile Include="Jeux\Joueurs\JoueurHumain.cpp" />
     <ClCompile Include="Jeux\Joueurs\JoueurIA.cpp" />
     <ClCompile Include="Jeux\Puissance4.cpp" />
     <ClCompile Include="Projet IA.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="IA\Couche.h" />
+    <ClInclude Include="IA\Model.h" />
+    <ClInclude Include="IA\Neurone.h" />
     <ClInclude Include="Jeux\Joueurs\Joueur.h" />
     <ClInclude Include="Jeux\Joueurs\JoueurHumain.h" />
     <ClInclude Include="Jeux\Joueurs\JoueurIA.h" />
