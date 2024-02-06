@@ -38,7 +38,14 @@ void Couche::affiche(ostream& stream) {
 double* Couche::renvoyerSorties()
 {
 	double* tab = new double[nbNeurones];
-	for (int i = 0; i < nbNeurones; i++) tab[i] = tabNeurones[i]->renvoyerVal();
+	for (int i = 0; i < nbNeurones; i++)
+	{
+		NeuroneFormat* nf = tabNeurones[i];
+		Neurone* n = dynamic_cast<Neurone*>(nf);
+		if (n != nullptr) {
+			tab[i] = n->renvoyerVal();
+		}
+	}
 	return tab;
 }
 

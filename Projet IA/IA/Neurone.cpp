@@ -24,12 +24,21 @@ void NeuroneInput::affiche(ostream& stream)
 	stream << "\t\tVal : " << valeur << endl;
 }
 
-Neurone::Neurone(NeuroneFormat** tab, int taille) : tabEntrees(tab), nbEntrees(taille), biais((double)rand() / (double)RAND_MAX)
+
+
+Neurone::Neurone(NeuroneFormat** tab, int taille) :
+	NeuroneFormat(),
+	valeurApresSigmoid(0),
+	tabEntrees(tab), nbEntrees(taille),
+	biais((double)rand() / (double)RAND_MAX),
+	gradient_biais(0)
 {
 	tabPoids = new double[taille];
 	for (int i = 0; i < taille; i++) {
 		tabPoids[i] = (double)rand() / (double)RAND_MAX;
 	}
+
+	gradients_poids = new double[nbEntrees] {0.0};
 }
 
 int Neurone::getTaille()
@@ -44,7 +53,12 @@ void Neurone::calculerVal()
 		valeur += tabEntrees[i]->renvoyerVal() * tabPoids[i];
 	}
 	valeur += biais;
-	valeur = sigmoid(valeur);
+	valeurApresSigmoid = sigmoid(valeur);
+}
+
+double Neurone::renvoyerVal()
+{
+	return valeurApresSigmoid;
 }
 
 void Neurone::affiche(ostream& stream)

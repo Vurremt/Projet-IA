@@ -30,10 +30,15 @@ private:
 	double* tabPoids;
 	int nbEntrees;
 	double biais;
+	double valeurApresSigmoid;
+
+	double gradient_biais;
+	double* gradients_poids;
 
 public:
 	Neurone(NeuroneFormat** tab, int taille);
 	int getTaille();
 	void calculerVal();
+	double renvoyerVal();
 	void affiche(ostream& stream);
 };
