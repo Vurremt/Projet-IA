@@ -12,6 +12,9 @@
 
 #include "IA/Model.h"  
 
+#include "Structure_Data.h"
+
+
 int main()
 {
     srand(time(NULL));
@@ -25,18 +28,23 @@ int main()
     jeu->boucle_de_jeu();
     */
 
-    int tabNbNeurones[] = {0};
-    Model* m = new Model(2, 0, nullptr, 1);
 
-    m->affiche(cout);
+    int tabNbNeurones[1] = {5};
+    Model* m = new Model(2, 1, tabNbNeurones, 1);
 
-    int tabEntree[] = { 2,3 };
 
-    m->initialiserEntrees(tabEntree);
+    Structure_Data_Fit * data_fit = recup_Data_Fit("test_fit.txt");
 
-    m->calculer();
-    
-    cout << "Resultat : " << m->resultat()[0] << endl;
+    m->fit(data_fit, 1000, 1, true, cout);
 
-    m->affiche(cout);
+
+    cout << "\n-------- Vrai Resultat --------\n" << endl;
+
+    Structure_Data* data = recup_Data("test.txt");
+
+    m->display_resultat(data, cout);
+
+
+    Structure_Data * big_data = recup_Data("big_data.txt");
+    m->display_resultat_simplify(big_data, "recup_data.txt");
 }

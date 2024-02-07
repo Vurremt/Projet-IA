@@ -134,6 +134,7 @@
     <ClCompile Include="Jeux\Joueurs\JoueurIA.cpp" />
     <ClCompile Include="Jeux\Puissance4.cpp" />
     <ClCompile Include="Projet IA.cpp" />
+    <ClCompile Include="Structure_Data.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IA\Couche.h" />
@@ -143,6 +144,13 @@
     <ClInclude Include="Jeux\Joueurs\JoueurHumain.h" />
     <ClInclude Include="Jeux\Joueurs\JoueurIA.h" />
     <ClInclude Include="Jeux\Puissance4.h" />
+    <ClInclude Include="Structure_Data.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="big_data.txt" />
+    <Text Include="recup_data.txt" />
+    <Text Include="test.txt" />
+    <Text Include="test_fit.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

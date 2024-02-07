@@ -19,21 +19,20 @@ public:
 class NeuroneInput : public NeuroneFormat {
 public:
 	NeuroneInput();
-	void initialiserInput(int val);
+	void initialiserInput(double val);
 	void affiche(ostream& stream);
 };
 
 
 class Neurone : public NeuroneFormat {
-private:
+protected:
 	NeuroneFormat** tabEntrees;
 	double* tabPoids;
 	int nbEntrees;
 	double biais;
 	double valeurApresSigmoid;
 
-	double gradient_biais;
-	double* gradients_poids;
+	double gradient;
 
 public:
 	Neurone(NeuroneFormat** tab, int taille);
@@ -41,4 +40,17 @@ public:
 	void calculerVal();
 	double renvoyerVal();
 	void affiche(ostream& stream);
+
+
+	void calculerGradient(double sommeGradientPoids); // Ajout d'une fonction pour calculer le gradient pour les couches cachées
+	void mettreAJourPoids(double tauxApprentissage); // Ajout d'une fonction pour mettre à jour les poids
+	double getPoids(int index); // Ajout d'une fonction pour obtenir le poids à un index donné
+	double getGradient(); // Ajout d'une fonction pour obtenir le gradient
+};
+
+
+class NeuroneOutput : public Neurone {
+public:
+	NeuroneOutput(NeuroneFormat** tab, int taille);
+	void calculerGradient(double target);
 };

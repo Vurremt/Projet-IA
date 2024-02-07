@@ -15,7 +15,7 @@ double NeuroneFormat::renvoyerVal()
 
 NeuroneInput::NeuroneInput(): NeuroneFormat(){}
 
-void NeuroneInput::initialiserInput(int val) {
+void NeuroneInput::initialiserInput(double val) {
 	valeur = sigmoid(val);
 }
 
@@ -31,14 +31,12 @@ Neurone::Neurone(NeuroneFormat** tab, int taille) :
 	valeurApresSigmoid(0),
 	tabEntrees(tab), nbEntrees(taille),
 	biais((double)rand() / (double)RAND_MAX),
-	gradient_biais(0)
+	gradient(0)
 {
 	tabPoids = new double[taille];
 	for (int i = 0; i < taille; i++) {
 		tabPoids[i] = (double)rand() / (double)RAND_MAX;
 	}
-
-	gradients_poids = new double[nbEntrees] {0.0};
 }
 
 int Neurone::getTaille()
@@ -68,5 +66,36 @@ void Neurone::affiche(ostream& stream)
 		stream << "W" << i+1 << ":" << tabPoids[i] << " | ";
 	}
 	stream << "Biais: " << biais << endl;
-	stream << "\t\tVal : " << valeur << endl;
+	stream << "\t\tVal : " << valeur << ", Val apres Sigmoid : " << valeurApresSigmoid << endl;
+}
+
+
+
+void Neurone::calculerGradient(double sommeGradientPoids) {
+	double output = renvoyerVal();
+	gradient = output * (1 - output) * sommeGradientPoids;
+}
+
+void Neurone::mettreAJourPoids(double tauxApprentissage) {
+	for (int i = 0; i < nbEntrees; i++) {
+		tabPoids[i] += tauxApprentissage * gradient * tabEntrees[i]->renvoyerVal();
+	}
+	biais += tauxApprentissage * gradient;
+	gradient = 0;
+}
+
+double Neurone::getPoids(int index) {
+	return tabPoids[index];
+}
+
+double Neurone::getGradient() {
+	return gradient;
+}
+
+NeuroneOutput::NeuroneOutput(NeuroneFormat** tab, int taille): Neurone(tab, taille){}
+
+void NeuroneOutput::calculerGradient(double target)
+{
+	double output = renvoyerVal();
+	gradient = output * (1 - output) * (target - output);
 }

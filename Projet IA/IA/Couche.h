@@ -3,16 +3,27 @@
 #include "Neurone.h"
 
 class Couche {
-private:
+protected:
 	NeuroneFormat** tabNeurones;
 	int nbNeurones;
 public:
 	Couche();
 	Couche(NeuroneFormat** tab, int taille, int nbNeurones);
+	int getNbNeurones();
 	NeuroneFormat** getTabNeurones();
 	void calculerCouche();
 	void affiche(ostream& stream);
 	double* renvoyerSorties();
+	double* getSommeGradientPoids(int nbEntrees);
+	void retropropagation(double* gradient);
+	void mettreAJourPoids(double tauxApprentissage);
+};
+
+class CoucheOutput: public Couche {
+public:
+	CoucheOutput();
+	CoucheOutput(NeuroneFormat** tab, int taille, int nbNeurones);
+	void retropropagation(double* target);
 };
 
 class CoucheInput {
@@ -21,7 +32,8 @@ private:
 	int nbNeurones;
 public:
 	CoucheInput(int nbNeurones);
+	int getNbNeurones();
 	NeuroneFormat** getTabNeurones();
-	void initialiserCouche(int* tab);
+	void initialiserCouche(double* tab);
 	void affiche(ostream& stream);
 };
