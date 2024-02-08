@@ -86,6 +86,12 @@ void Model::retropropagation(double* target)
 {
 	coucheOutput->retropropagation(target);
 	double* gradients = (nbCouches >= 1) ? coucheOutput->getSommeGradientPoids(tabCouche[nbCouches - 1]->getNbNeurones()) : nullptr;
+	/*
+	cout << "Le gradient propage de output a i-1 : " << endl;
+	for (int i = 0; i < tabCouche[nbCouches - 1]->getNbNeurones(); i++) {
+		cout << "   gradient " << i << " : " << gradients[i] << endl;
+	}
+	*/
 
 	for (int i = nbCouches - 1; i >= 0; i--) {
 		tabCouche[i]->retropropagation(gradients);
@@ -101,16 +107,43 @@ void Model::mettreAJourPoids(double tauxApprentissage)
 	coucheOutput->mettreAJourPoids(tauxApprentissage);
 }
 
-void Model::fit(Structure_Data_Fit * data_fit, int nbRepet, double tauxApprentissage, bool display, ostream& stream)
+void Model::fit(Structure_Data_Fit * data_fit, int nbRepet, double tauxApprentissage)
 {
-	int repet_modulo = nbRepet / 100;
+	double mean_square_error;
+	cout << "Entrainement a 00% : ";
+	mean_square_error = 0.0;
+
+	for (int iData = 0; iData < data_fit->nbData; iData++) {
+		initialiserEntrees(data_fit->tabEntrees[iData]);
+		calculer();
+
+		double* Results = resultat();
+
+		for (int jResult = 0; jResult < coucheOutput->getNbNeurones(); jResult++) {
+			cout << "Neurone " << jResult << " : " << endl;
+			mean_square_error += (Results[jResult] - data_fit->tabSorties[iData][jResult]) * (Results[jResult] - data_fit->tabSorties[iData][jResult]) / coucheOutput->getNbNeurones();
+			cout << "   Resultat obtenu : " << Results[jResult] << endl;
+			cout << "   Resultat attendu : " << data_fit->tabSorties[iData][jResult] << endl;
+			cout << "   Difference : " << Results[jResult] - data_fit->tabSorties[iData][jResult] << " | Carre : " << (Results[jResult] - data_fit->tabSorties[iData][jResult]) * (Results[jResult] - data_fit->tabSorties[iData][jResult]) << endl;
+			cout << "   Moyenne quadratique " << (Results[jResult] - data_fit->tabSorties[iData][jResult]) * (Results[jResult] - data_fit->tabSorties[iData][jResult]) / data_fit->nbData << endl;
+		}
+
+		cout << "   Val reinjectee dans rectropropagation : " << data_fit->tabSorties[iData][0] << endl;
+		retropropagation(data_fit->tabSorties[iData]);
+		mettreAJourPoids(tauxApprentissage);
+	}
+	for (int jResult = 0; jResult < coucheOutput->getNbNeurones(); jResult++) {
+		cout << mean_square_error / data_fit->nbData << " ( Moyenne des mean square error des toutes les donnees )" << endl;
+	}
+
+	int repet_modulo = nbRepet / 10;
 
 	for (int iRepet = 0; iRepet < nbRepet; iRepet++) {
 
-		double* mean_square_error = nullptr;
-		if (display && iRepet % repet_modulo == 0) {
-			stream << "Iter " << iRepet << " : " << endl;
-			mean_square_error = new double[coucheOutput->getNbNeurones()] {0.0};
+		double mean_square_error;
+		if (iRepet % repet_modulo == 0) {
+			cout << "Entrainement a " << iRepet / repet_modulo * 10 << "% : ";
+			mean_square_error = 0.0;
 		}
 
 		for (int iData = 0; iData < data_fit->nbData; iData++) {
@@ -119,23 +152,20 @@ void Model::fit(Structure_Data_Fit * data_fit, int nbRepet, double tauxApprentis
 
 			double* Results = resultat();
 			
-			if (display && iRepet % repet_modulo == 0) {
+			if (iRepet % repet_modulo == 0) {
 				for (int jResult = 0; jResult < coucheOutput->getNbNeurones(); jResult++) {
-					stream << "gradient : " << Results[jResult] - data_fit->tabSorties[iData][jResult] << endl;
-
-					mean_square_error[jResult] += (Results[jResult] - data_fit->tabSorties[iData][jResult]) * (Results[jResult] - data_fit->tabSorties[iData][jResult]);
+					mean_square_error += (Results[jResult] - data_fit->tabSorties[iData][jResult]) * (Results[jResult] - data_fit->tabSorties[iData][jResult]) / coucheOutput->getNbNeurones();
+					//cout << (Results[jResult] - data_fit->tabSorties[iData][jResult]) * (Results[jResult] - data_fit->tabSorties[iData][jResult]) / coucheOutput->getNbNeurones() << endl;
 				}
-				stream << "----------------------" << endl;
 			}
 
 			retropropagation(data_fit->tabSorties[iData]);
 			mettreAJourPoids(tauxApprentissage);
 		}
-		if (display && iRepet % repet_modulo == 0) {
+		if (iRepet % repet_modulo == 0) {
 			for (int jResult = 0; jResult < coucheOutput->getNbNeurones(); jResult++) {
-				stream << "mean square error : " << mean_square_error[jResult] / data_fit->nbData << endl;
+				cout << mean_square_error / data_fit->nbData << " ( Moyenne des mean square error des toutes les donnees )" << endl;
 			}
-			affiche(stream);
 		}
 	}
 }

@@ -29,22 +29,27 @@ int main()
     */
 
 
-    int tabNbNeurones[1] = {5};
+    int tabNbNeurones[1] = {30};
     Model* m = new Model(2, 1, tabNbNeurones, 1);
 
+    cout << "\n-------- Reseau Init --------\n" << endl;
+    m->affiche(cout);
 
-    Structure_Data_Fit * data_fit = recup_Data_Fit("test_fit.txt");
+    Structure_Data_Fit * data_fit = recup_Data_Fit("data/spiral_data_fit.txt");
 
-    m->fit(data_fit, 1000, 1, true, cout);
+    m->fit(data_fit, 10000, 0.8);
 
+    cout << "\n-------- Reseau Entraine --------\n" << endl;
+    m->affiche(cout);
 
-    cout << "\n-------- Vrai Resultat --------\n" << endl;
+    cout << "\n-------- Entrainement Termine --------\n" << endl;
 
-    Structure_Data* data = recup_Data("test.txt");
+    
+    Structure_Data* data = recup_Data("data/test_data_simple.txt");
 
     m->display_resultat(data, cout);
 
 
-    Structure_Data * big_data = recup_Data("big_data.txt");
-    m->display_resultat_simplify(big_data, "recup_data.txt");
+    Structure_Data * big_data = recup_Data("data/test_big_data.txt");
+    m->display_resultat_simplify(big_data, "data/recup_data.txt");
 }

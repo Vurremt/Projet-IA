@@ -67,9 +67,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="test.txt" />
-    <Text Include="test_fit.txt" />
-    <Text Include="recup_data.txt" />
-    <Text Include="big_data.txt" />
+    <Text Include="data\test_big_data.txt" />
+    <Text Include="data\data_fit.txt" />
+    <Text Include="data\recup_data.txt" />
+    <Text Include="data\test_data_simple.txt" />
+    <Text Include="data\spiral_data_fit.txt" />
   </ItemGroup>
 </Project>

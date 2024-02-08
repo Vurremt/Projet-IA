@@ -18,6 +18,6 @@ public:
 	void display_resultat_simplify(Structure_Data* data, const string nomFichier);
 	void retropropagation(double* target);
 	void mettreAJourPoids(double tauxApprentissage);
-	void fit(Structure_Data_Fit * data_fit, int nbRepet, double tauxApprentissage, bool display, ostream& stream);
+	void fit(Structure_Data_Fit * data_fit, int nbRepet, double tauxApprentissage);
 	void affiche(ostream& stream);
 };

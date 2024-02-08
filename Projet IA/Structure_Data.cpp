@@ -25,7 +25,6 @@ Structure_Data* recup_Data(const string nomFichier) {
 		file >> nbEntrees;
 
 		double** tabEntrees = new double* [nbData];
-		double** tabSorties = new double* [nbData];
 		for (int iData = 0; iData < nbData; iData++) {
 			tabEntrees[iData] = new double[nbEntrees];
 

@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-with open("../test_fit.txt", 'r') as file:
+with open("../data/recup_data.txt", 'r') as file:
     ligne = file.readline()
     tab = ligne.strip("\n").split(' ');
     nbData = int(tab[0])
@@ -16,7 +16,9 @@ with open("../test_fit.txt", 'r') as file:
         
         tabX.append(float(tab[0]))
         tabY.append(float(tab[1]))
-        tabS.append(float(tab[2]))
+        if(float(tab[2]) < 0.5) : tabS.append(0)
+        else : tabS.append(1)
+        
 
-    plt.scatter(tabX, tabY,c=tabS)
+    plt.scatter(tabX, tabY,c=tabS, marker=".")
     plt.show()
