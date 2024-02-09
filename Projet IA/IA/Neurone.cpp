@@ -56,6 +56,13 @@ void Neurone::calculerVal()
 
 double Neurone::renvoyerVal()
 {
+	//cout << "      avant sigmoid : " << valeur << ", Valeur de retour : " << valeurApresSigmoid << endl;
+	return valeurApresSigmoid;
+}
+
+double NeuroneOutput::renvoyerVal()
+{
+	//cout << "      avant sigmoid output : " << valeur << ", Valeur de retour Output: " << valeurApresSigmoid << endl;
 	return valeurApresSigmoid;
 }
 
@@ -66,14 +73,15 @@ void Neurone::affiche(ostream& stream)
 		stream << "W" << i+1 << ":" << tabPoids[i] << " | ";
 	}
 	stream << "Biais: " << biais << endl;
+	stream << "\t\tGradient: " << gradient << endl;
 	stream << "\t\tVal : " << valeur << ", Val apres Sigmoid : " << valeurApresSigmoid << endl;
 }
 
 
 
 void Neurone::calculerGradient(double sommeGradientPoids) {
-	double output = renvoyerVal();
-	gradient = output * (1 - output) * sommeGradientPoids;
+	double expo = exp(-valeur);
+	gradient = sommeGradientPoids* (expo / ((1 + expo) * (1 + expo)));
 }
 
 void Neurone::mettreAJourPoids(double tauxApprentissage) {
@@ -96,6 +104,6 @@ NeuroneOutput::NeuroneOutput(NeuroneFormat** tab, int taille): Neurone(tab, tail
 
 void NeuroneOutput::calculerGradient(double target)
 {
-	double output = renvoyerVal();
-	gradient = output * (1 - output) * (target - output);
+	double expo = exp(-valeur);
+	gradient = (renvoyerVal()-target) * (expo / ((1 + expo) * (1 + expo)));
 }

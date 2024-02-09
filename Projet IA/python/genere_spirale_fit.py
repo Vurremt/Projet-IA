@@ -21,7 +21,7 @@ def deux_spirales(N=500, rad=2*np.pi, th0=np.pi/2):
         file.write(" 2 1\n")
         x = points[:, 0]
         y = points[:, 1]
-        for i in range(N):
+        for i in range(0,N//2):
             file.write("%.3f" % x[i])
             file.write(" ")
             file.write("%.3f" % y[i])
@@ -30,7 +30,17 @@ def deux_spirales(N=500, rad=2*np.pi, th0=np.pi/2):
                 file.write("1")
                 file.write("\n")
             else:
-                file.write("0" % y[i])
+                file.write("0" % y[(N//2)+i])
+                file.write("\n")
+            file.write("%.3f" % x[(N//2)+i])
+            file.write(" ")
+            file.write("%.3f" % y[(N//2)+i])
+            file.write(" ")
+            if classes[(N//2)+i] == 'Rouge' :
+                file.write("1")
+                file.write("\n")
+            else:
+                file.write("0" % y[(N//2)+i])
                 file.write("\n")
     
 

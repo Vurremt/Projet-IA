@@ -29,7 +29,7 @@ int main()
     */
 
 
-    int tabNbNeurones[1] = {30};
+    int tabNbNeurones[1] = {15};
     Model* m = new Model(2, 1, tabNbNeurones, 1);
 
     cout << "\n-------- Reseau Init --------\n" << endl;
@@ -44,7 +44,7 @@ int main()
 
     cout << "\n-------- Entrainement Termine --------\n" << endl;
 
-    
+
     Structure_Data* data = recup_Data("data/test_data_simple.txt");
 
     m->display_resultat(data, cout);

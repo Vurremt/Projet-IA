@@ -53,4 +53,5 @@ class NeuroneOutput : public Neurone {
 public:
 	NeuroneOutput(NeuroneFormat** tab, int taille);
 	void calculerGradient(double target);
+	double renvoyerVal();
 };

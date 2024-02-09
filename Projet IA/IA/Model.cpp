@@ -109,6 +109,7 @@ void Model::mettreAJourPoids(double tauxApprentissage)
 
 void Model::fit(Structure_Data_Fit * data_fit, int nbRepet, double tauxApprentissage)
 {
+	
 	double mean_square_error;
 	cout << "Entrainement a 00% : ";
 	mean_square_error = 0.0;
@@ -119,21 +120,22 @@ void Model::fit(Structure_Data_Fit * data_fit, int nbRepet, double tauxApprentis
 
 		double* Results = resultat();
 
-		for (int jResult = 0; jResult < coucheOutput->getNbNeurones(); jResult++) {
-			cout << "Neurone " << jResult << " : " << endl;
-			mean_square_error += (Results[jResult] - data_fit->tabSorties[iData][jResult]) * (Results[jResult] - data_fit->tabSorties[iData][jResult]) / coucheOutput->getNbNeurones();
-			cout << "   Resultat obtenu : " << Results[jResult] << endl;
-			cout << "   Resultat attendu : " << data_fit->tabSorties[iData][jResult] << endl;
-			cout << "   Difference : " << Results[jResult] - data_fit->tabSorties[iData][jResult] << " | Carre : " << (Results[jResult] - data_fit->tabSorties[iData][jResult]) * (Results[jResult] - data_fit->tabSorties[iData][jResult]) << endl;
-			cout << "   Moyenne quadratique " << (Results[jResult] - data_fit->tabSorties[iData][jResult]) * (Results[jResult] - data_fit->tabSorties[iData][jResult]) / data_fit->nbData << endl;
-		}
+			for (int jResult = 0; jResult < coucheOutput->getNbNeurones(); jResult++) {
+				cout << "Neurone " << jResult << " : " << endl;
+				mean_square_error += (Results[jResult] - data_fit->tabSorties[iData][jResult]) * (Results[jResult] - data_fit->tabSorties[iData][jResult]);
+				cout << "   Resultat obtenu : " << Results[jResult] << endl;
+				cout << "   Resultat attendu : " << data_fit->tabSorties[iData][jResult] << endl;
+				cout << "   Difference : " << Results[jResult] - data_fit->tabSorties[iData][jResult] << " | Carre : " << (Results[jResult] - data_fit->tabSorties[iData][jResult]) * (Results[jResult] - data_fit->tabSorties[iData][jResult]) << endl;
+				cout << "   Val reinjectee dans rectropropagation : " << data_fit->tabSorties[iData][jResult] << endl;
+			}
 
-		cout << "   Val reinjectee dans rectropropagation : " << data_fit->tabSorties[iData][0] << endl;
-		retropropagation(data_fit->tabSorties[iData]);
-		mettreAJourPoids(tauxApprentissage);
+			retropropagation(data_fit->tabSorties[iData]);
+			cout << "   Nouveau gradient du neurone output : " << dynamic_cast<Neurone*>(coucheOutput->getTabNeurones()[0])->getGradient() << endl;
+			mettreAJourPoids(tauxApprentissage);
 	}
+
 	for (int jResult = 0; jResult < coucheOutput->getNbNeurones(); jResult++) {
-		cout << mean_square_error / data_fit->nbData << " ( Moyenne des mean square error des toutes les donnees )" << endl;
+		cout << sqrt(mean_square_error / data_fit->nbData) << " ( Moyenne des mean square error des toutes les donnees )" << endl;
 	}
 
 	int repet_modulo = nbRepet / 10;
@@ -151,11 +153,11 @@ void Model::fit(Structure_Data_Fit * data_fit, int nbRepet, double tauxApprentis
 			calculer();
 
 			double* Results = resultat();
-			
+
 			if (iRepet % repet_modulo == 0) {
 				for (int jResult = 0; jResult < coucheOutput->getNbNeurones(); jResult++) {
-					mean_square_error += (Results[jResult] - data_fit->tabSorties[iData][jResult]) * (Results[jResult] - data_fit->tabSorties[iData][jResult]) / coucheOutput->getNbNeurones();
-					//cout << (Results[jResult] - data_fit->tabSorties[iData][jResult]) * (Results[jResult] - data_fit->tabSorties[iData][jResult]) / coucheOutput->getNbNeurones() << endl;
+					mean_square_error += (Results[jResult] - data_fit->tabSorties[iData][jResult]) * (Results[jResult] - data_fit->tabSorties[iData][jResult]);
+					//cout << (Results[jResult] - data_fit->tabSorties[iData][jResult]) * (Results[jResult] - data_fit->tabSorties[iData][jResult]) << endl;
 				}
 			}
 
@@ -164,7 +166,7 @@ void Model::fit(Structure_Data_Fit * data_fit, int nbRepet, double tauxApprentis
 		}
 		if (iRepet % repet_modulo == 0) {
 			for (int jResult = 0; jResult < coucheOutput->getNbNeurones(); jResult++) {
-				cout << mean_square_error / data_fit->nbData << " ( Moyenne des mean square error des toutes les donnees )" << endl;
+				cout << sqrt(mean_square_error / data_fit->nbData) << " ( Moyenne des mean square error des toutes les donnees )" << endl;
 			}
 		}
 	}
