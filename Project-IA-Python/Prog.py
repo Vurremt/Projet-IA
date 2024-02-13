@@ -19,13 +19,18 @@ for i in range(N):
     else:
         yData.append(0)
 
+
 model = Network()
+model.load("test.txt")
+"""
 model.addLayer( Linear(2, 30) )
 model.addLayer( Sigmoid() )
 model.addLayer( Linear(30, 1 ))
 model.addLayer( Sigmoid() )
+"""
 
-model.fit(xData, yData, 100000, 0.01)
+model.fit(xData, yData, 10000, 0.001)
+model.save("test.txt")
 
 
 # Affichage

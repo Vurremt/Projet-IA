@@ -9,6 +9,10 @@ class Linear:
         self.gradient_weight = numpy.zeros(shape=(self.input_dimension, self.output_dimension))  # Weight gradient
         self.gradient_bias = numpy.zeros(shape=(self.output_dimension,))  # Bias gradient
 
+    def load(self, weight, bias):
+        self.weight = weight  # Weight
+        self.bias = bias  # Bias
+
     def feedforward(self, X):
         Y = numpy.matmul(X, self.weight) + self.bias  # Linear transformation
         return Y
@@ -27,6 +31,17 @@ class Linear:
         self.gradient_weight = numpy.zeros(shape=(self.input_dimension, self.output_dimension))  # reset gradient
         self.gradient_bias = numpy.zeros(shape=(self.output_dimension,))  # reset gradient
 
+    def save(self, file):
+        file.write("%d %d\n" % (self.input_dimension, self.output_dimension))
+        for i in range(self.input_dimension):
+            for j in range(self.output_dimension):
+                if j != self.output_dimension - 1 : file.write(str(self.weight[i][j]) + " ")
+                else : file.write(str(self.weight[i][j]) + "\n")
+        for j in range(self.output_dimension):
+            if j != self.output_dimension - 1:
+                file.write(str(self.bias[j]) + " ")
+            else:
+                file.write(str(self.bias[j]) + "\n")
 
 class Sigmoid:
     def __init__(self):
@@ -43,6 +58,9 @@ class Sigmoid:
 
     def update(self, learning_rate):
         pass # Nothing to do
+
+    def save(self, file):
+        pass
 
 class Network:
     def __init__(self):
@@ -88,3 +106,54 @@ class Network:
 
                 self.backpropagation(score_gradient)  # Compute gradients
                 self.update(learning_rate)  # udpate
+
+    def save(self, filename):
+        with open(filename, 'w') as file:
+            line = ""
+            for l in self.layers:
+                if type(l) == Linear:
+                    line += "L "
+                elif type(l) == Sigmoid:
+                    line += "S "
+                else : exit(1)
+            file.write(line.rstrip() + "\n")
+            for l in self.layers:
+                l.save(file)
+
+    def load(self, filename):
+        with open(filename, 'r') as file:
+            line = file.readline()
+            layers = line.strip("\n").split(' ');
+            model = Network()
+            neuro_current = 0
+            for l in layers :
+                if l == "S" :
+                    self.addLayer(Sigmoid())
+
+                elif l == "L" :
+                    line = file.readline()
+                    dimension = line.strip("\n").split(' ');
+                    input_dimension = int(dimension[0])
+                    output_dimension = int(dimension[1])
+
+                    weight = []
+                    bias = []
+
+                    for i in range(input_dimension) :
+                        line = file.readline()
+                        line_weight = line.strip("\n").split(' ');
+                        weight.append([])
+                        for l in line_weight :
+                            weight[i].append(float(l))
+
+                    line = file.readline()
+                    line_bias = line.strip("\n").split(' ');
+                    for l in line_bias:
+                        bias.append(float(l))
+
+                    self.addLayer(Linear(input_dimension,output_dimension))
+                    self.layers[neuro_current].load(numpy.array(weight), numpy.array(bias))
+
+                else :
+                    exit(1)
+                neuro_current += 1
