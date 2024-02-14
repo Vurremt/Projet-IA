@@ -29,7 +29,7 @@ model.addLayer( Linear(30, 1 ))
 model.addLayer( Sigmoid() )
 """
 
-model.fit(xData, yData, 10000, 0.001)
+model.fit(xData, yData, 100000, 0.001)
 model.save("test.txt")
 
 
