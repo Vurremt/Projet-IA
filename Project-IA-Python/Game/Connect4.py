@@ -36,7 +36,39 @@ class Connect4:
                 if self.grid[i][j] == 0 : return False
         return True
 
-    def is_winner(self):
+    def is_winner(self, col, line, num_player):
+        # Horizontal check
+        for i in range(4):
+            if col - i >= 0 and col - i + 3 < 7:
+                if (self.grid[line][col - i] == num_player and self.grid[line][col - i + 1] == num_player and
+                        self.grid[line][col - i + 2] == num_player and self.grid[line][col - i + 3] == num_player):
+                    return True
+
+        # Vertical check
+        if line <= 2:
+            if (self.grid[line][col] == num_player and self.grid[line + 1][col] == num_player and
+                    self.grid[line + 2][col] == num_player and self.grid[line + 3][col] == num_player):
+                return True
+
+        # Diagonal check (bottom left to top right)
+        for i in range(4):
+            if col - i >= 0 and col - i + 3 < 7 and line - i >= 0 and line - i + 3 < 6:
+                if (self.grid[line - i][col - i] == num_player and self.grid[line - i + 1][
+                    col - i + 1] == num_player and
+                        self.grid[line - i + 2][col - i + 2] == num_player and self.grid[line - i + 3][
+                            col - i + 3] == num_player):
+                    return True
+
+        # Diagonal check (top left to bottom right)
+        for i in range(4):
+            if col - i >= 0 and col - i + 3 < 7 and line + i - 3 >= 0 and line + i < 6:
+                if (self.grid[line + i][col - i] == num_player and self.grid[line + i - 1][
+                    col - i + 1] == num_player and
+                        self.grid[line + i - 2][col - i + 2] == num_player and self.grid[line + i - 3][
+                            col - i + 3] == num_player):
+                    return True
+
+        # If no win condition is met, return False
         return False
 
     def play_one_turn(self, display):
@@ -59,7 +91,7 @@ class Connect4:
 
         if display : self.displayGrid()
 
-        if self.is_winner() : return ((self.round + 1) % 2) + 1
+        if self.is_winner(input_player, line_i, ((self.round + 1) % 2) + 1) : return ((self.round + 1) % 2) + 1
         elif self.full_grid() : return 3
         else : return 0
 
