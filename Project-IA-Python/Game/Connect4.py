@@ -1,5 +1,6 @@
 import numpy as np
 from Player import *
+from Reseau import *
 
 class Connect4:
     def __init__(self, player1, player2):
@@ -79,7 +80,7 @@ class Connect4:
             current_player = self.player2
 
         if display :
-            print(f"------ Round {self.round} ------")
+            print(f"---- Round {self.round} : {current_player.name} turn ----")
             if type(current_player) == HumanPlayer : print("Choise : ",end ='')
 
         input_player = self.recup_action(current_player) - 1
@@ -99,36 +100,53 @@ class Connect4:
         if display : self.displayGrid()
 
         winner = 0
-        while(winner == 0):
+        while winner == 0:
             winner = self.play_one_turn(display)
 
-        if(winner == 1):
+        if winner == 1:
             if type(self.player1) == AIPlayer :
+                self.player1.network.states_rewards[-1] = 1
                 # Good score + backpropagation player1
                 pass
             if type(self.player2) == AIPlayer :
+                self.player2.network.states_rewards[-1] = -1
                 # Bad score + backpropagation player2
                 pass
-            if display : print("Player 1 won!")
-        if(winner == 2):
+            if display : print(f"Player 1 {player1.name} won!")
+        if winner == 2:
             if type(self.player2) == AIPlayer :
+                self.player2.network.states_rewards[-1] = 1
                 # Good score + backpropagation player2
                 pass
             if type(self.player1) == AIPlayer :
+                self.player1.network.states_rewards[-1] = -1
                 # Bad score + backpropagation player1
                 pass
-            if display : print("Player 2 won!")
-        if(winner == 3):
+            if display : print(f"Player 2 {player2.name} won!")
+        if winner == 3:
             if type(self.player1) == AIPlayer :
+                self.player1.network.states_rewards[-1] = -0.5
                 # Medium score + backpropagation player1
                 pass
             if type(self.player2) == AIPlayer :
+                self.player2.network.states_rewards[-1] = -0.5
                 # Medium score + backpropagation player2
                 pass
             if display : print("Draw !")
 
+
+
 player1 = HumanPlayer("Evahn")
-player2 = HumanPlayer("Paul")
+
+model = Network_RL()
+model.addLayer( Linear(42, 50) )
+model.addLayer( Sigmoid() )
+model.addLayer( Linear(50, 7 ))
+model.addLayer( Sigmoid() )
+player2 = AIPlayer("Yui", model)
+
 c = Connect4(player1,player2)
 
 c.game_loop(display=True)
+
+print(player2.network.states_rewards[-1], player2.network.states_inputs[-1])

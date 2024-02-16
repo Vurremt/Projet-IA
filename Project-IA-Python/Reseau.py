@@ -62,6 +62,28 @@ class Sigmoid:
     def save(self, file):
         pass
 
+# Marche peut etre, pas sur, à n'utiliser qu'avec plus de 1 sortie
+class Softmax:
+    def __init__(self):
+        pass
+
+    def feedforward(self, X):
+        e_x = numpy.exp(X - numpy.max(X))
+        return e_x / e_x.sum(axis=0)
+
+    def backpropagation(self, X, gradient_Y):
+        s = self.feedforward(X)
+        S = numpy.diagflat(s) - numpy.outer(s, s)
+        gradient_X = numpy.dot(S, gradient_Y)
+        return gradient_X
+
+    def update(self, learning_rate):
+        pass  # Nothing to do
+
+    def save(self, file):
+        pass  # Nothing to do
+
+
 class Network:
     def __init__(self):
         self.layers = list()  # List of layers
@@ -115,6 +137,8 @@ class Network:
                     line += "L "
                 elif type(l) == Sigmoid:
                     line += "S "
+                elif type(l) == Softmax:
+                    line += "M "
                 else : exit(1)
             file.write(line.rstrip() + "\n")
             for l in self.layers:
@@ -129,6 +153,9 @@ class Network:
             for l in layers :
                 if l == "S" :
                     self.addLayer(Sigmoid())
+
+                elif l == "M":
+                    self.addLayer(Softmax())
 
                 elif l == "L" :
                     line = file.readline()
@@ -157,3 +184,13 @@ class Network:
                 else :
                     exit(1)
                 neuro_current += 1
+
+class Network_RL (Network):
+    def __init__(self):
+        super().__init__()
+        self.states_rewards = list()
+        self.states_inputs = list()
+
+    def add_state(self, reward, input):
+        self.states_rewards.append(reward)
+        self.states_inputs.append(input)

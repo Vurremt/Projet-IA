@@ -21,16 +21,15 @@ for i in range(N):
 
 
 model = Network()
-model.load("test.txt")
-"""
-model.addLayer( Linear(2, 30) )
+#model.load("test.txt")
+model.addLayer( Linear(2, 5) )
 model.addLayer( Sigmoid() )
-model.addLayer( Linear(30, 1 ))
+model.addLayer( Linear(5, 1 ))
 model.addLayer( Sigmoid() )
-"""
+model.addLayer( Softmax() )
 
-model.fit(xData, yData, 100000, 0.001)
-model.save("test.txt")
+model.fit(xData, yData, 100, 0.5)
+#model.save("test.txt")
 
 
 # Affichage
