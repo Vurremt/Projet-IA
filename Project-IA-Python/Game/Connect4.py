@@ -103,50 +103,107 @@ class Connect4:
         while winner == 0:
             winner = self.play_one_turn(display)
 
+        if display and winner == 1: print(f"Player 1 {self.player1.name} won!")
+        if display and winner == 2: print(f"Player 2 {self.player2.name} won!")
+        if display and winner == 3: print("Draw !")
+        return winner
+
+
+def play_game_vs_random(player_ai, player_random, nb_games):
+    lose = 0
+    win = 0
+    draw = 0
+    for i in range(nb_games):
+        if(randint(0,1) == 1):
+            player1 = player_ai
+            player2 = player_random
+            c = Connect4(player1, player2)
+            winner = c.game_loop(display=False)
+            if winner == 1 :
+                win += 1
+            if winner == 2 :
+                lose += 1
+            if winner == 3 :
+                draw += 1
+        else:
+            player1 = player_random
+            player2 = player_ai
+            c = Connect4(player1, player2)
+            winner = c.game_loop(display=False)
+            if winner == 1:
+                lose += 1
+            if winner == 2:
+                win += 1
+            if winner == 3:
+                draw += 1
+    print(f"Win rate = {int((win / (win + lose + draw)) * 100)}%")
+
+
+def fit_game(player_1, player_2, nb_games, factor, start_learning_rate, end_learning_rate, step_learning_rate):
+
+    learning_rate = start_learning_rate
+    for i in range(nb_games):
+        print(f"Game {i}", end='')
+        player_1.network.clear_states()
+        player_2.network.clear_states()
+        if (randint(0, 1) == 1):
+            player1 = player_1 # !!!!!!!!!!!! Attention il faut par reference, pas par copie !!!!!!!!!!!
+            player2 = player_2
+        else:
+            player1 = player_2
+            player2 = player_1
+
+        c = Connect4(player1, player2)
+        winner = c.game_loop(display=False)
+        del c
+        print(f", winner : {winner}")
+
         if winner == 1:
-            if type(self.player1) == AIPlayer :
-                self.player1.network.states_rewards[-1] = 1
-                # Good score + backpropagation player1
-                pass
-            if type(self.player2) == AIPlayer :
-                self.player2.network.states_rewards[-1] = -1
-                # Bad score + backpropagation player2
-                pass
-            if display : print(f"Player 1 {player1.name} won!")
+            player1.network.update_all_states(1, factor, learning_rate)
+            player2.network.update_all_states(-1, factor, learning_rate)
+
         if winner == 2:
-            if type(self.player2) == AIPlayer :
-                self.player2.network.states_rewards[-1] = 1
-                # Good score + backpropagation player2
-                pass
-            if type(self.player1) == AIPlayer :
-                self.player1.network.states_rewards[-1] = -1
-                # Bad score + backpropagation player1
-                pass
-            if display : print(f"Player 2 {player2.name} won!")
+            player2.network.update_all_states(1, factor, learning_rate)
+            player1.network.update_all_states(-1, factor, learning_rate)
+
         if winner == 3:
-            if type(self.player1) == AIPlayer :
-                self.player1.network.states_rewards[-1] = -0.5
-                # Medium score + backpropagation player1
-                pass
-            if type(self.player2) == AIPlayer :
-                self.player2.network.states_rewards[-1] = -0.5
-                # Medium score + backpropagation player2
-                pass
-            if display : print("Draw !")
+            player1.network.update_all_states(-0.5, factor, learning_rate)
+            player2.network.update_all_states(-0.5, factor, learning_rate)
+
+        if i % 100 == 0:
+            player_1.network.save("../player1.txt")
+            player_2.network.save("../player2.txt")
+            playerRand = RandomPlayer("Rand")
+            print("Player 1 ", end = '')
+            play_game_vs_random(player_1, playerRand, 100)
+            print("Player 2 ", end='')
+            play_game_vs_random(player_2, playerRand, 100)
+            print()
+
+        if learning_rate > end_learning_rate:
+            learning_rate -= step_learning_rate
 
 
 
-player1 = HumanPlayer("Evahn")
+#player1 = HumanPlayer("Evahn")
+
 
 model = Network_RL()
 model.addLayer( Linear(42, 50) )
 model.addLayer( Sigmoid() )
 model.addLayer( Linear(50, 7 ))
 model.addLayer( Sigmoid() )
-player2 = AIPlayer("Yui", model)
+model.addLayer( Proba_output() )
+player_1 = AIPlayer("P1", model)
 
-c = Connect4(player1,player2)
+model2 = Network_RL()
+model2.addLayer( Linear(42, 50) )
+model2.addLayer( Sigmoid() )
+model2.addLayer( Linear(50, 7 ))
+model2.addLayer( Sigmoid() )
+model2.addLayer( Proba_output() )
+player_2 = AIPlayer("P2", model2)
 
-c.game_loop(display=True)
 
-print(player2.network.states_rewards[-1], player2.network.states_inputs[-1])
+
+fit_game(player_1, player_2, 100000, 0.5, 0.95, 0.05, 0.00001)

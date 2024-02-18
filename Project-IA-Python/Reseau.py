@@ -84,6 +84,24 @@ class Softmax:
         pass  # Nothing to do
 
 
+class Proba_output:
+    def __init__(self):
+        pass
+
+    def feedforward(self, X):
+        return X / sum(X)
+
+    def backpropagation(self, X, gain):
+        results = X / sum(X)
+        return - gain * numpy.log(results)
+
+    def update(self, learning_rate):
+        pass  # Nothing to do
+
+    def save(self, file):
+        pass  # Nothing to do
+
+
 class Network:
     def __init__(self):
         self.layers = list()  # List of layers
@@ -139,6 +157,8 @@ class Network:
                     line += "S "
                 elif type(l) == Softmax:
                     line += "M "
+                elif type(l) == Proba_output:
+                    line += "P "
                 else : exit(1)
             file.write(line.rstrip() + "\n")
             for l in self.layers:
@@ -156,6 +176,9 @@ class Network:
 
                 elif l == "M":
                     self.addLayer(Softmax())
+
+                elif l == "P":
+                    self.addLayer(Proba_output())
 
                 elif l == "L" :
                     line = file.readline()
@@ -191,6 +214,28 @@ class Network_RL (Network):
         self.states_rewards = list()
         self.states_inputs = list()
 
+    def clear_states(self):
+        self.states_rewards.clear()
+        self.states_inputs.clear()
+
     def add_state(self, reward, input):
         self.states_rewards.append(reward)
         self.states_inputs.append(input)
+
+    def calcul_gain(self, final_reward, factor):  # factor 0 = only last reward / 1 = all reward with same factor
+        self.states_rewards[-1] = final_reward
+        for i in reversed(range(len(self.states_rewards) - 1)):
+            self.states_rewards[i] = self.states_rewards[i] + factor * self.states_rewards[i + 1]
+
+    def backpropagation(self, gain):
+        gradient = gain
+        for i in reversed(range(len(self.layers))):
+            X = self.inputs[i]  # Input of layer i
+            gradient = self.layers[i].backpropagation(X, gradient)  # get next gradient
+
+    def update_all_states(self, final_reward, factor, learning_rate):
+        self.calcul_gain(final_reward, factor)
+        for i in range(len(self.states_inputs)):
+            self.feedforward(self.states_inputs[i])
+            self.backpropagation(self.states_rewards[i])
+            self.update(learning_rate)

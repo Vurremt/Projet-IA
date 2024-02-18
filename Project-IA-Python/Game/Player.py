@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from numpy import ravel, sum, cumsum, searchsorted
-from random import uniform
+from random import uniform, randint
 
 class Player(ABC):
     def __init__(self, name):
@@ -14,6 +14,10 @@ class HumanPlayer(Player):
     def play_one_action(self, grid):
         return int(input())
 
+class RandomPlayer(Player):
+    def play_one_action(self, grid):
+        return randint(1, 7)
+
 class AIPlayer(Player):
     def __init__(self, name, network):
         super().__init__(name)
@@ -22,11 +26,9 @@ class AIPlayer(Player):
     def play_one_action(self, grid):
         input = ravel(grid)
         self.network.add_state(0, input)
-        print(self.network.states_rewards[-1], self.network.states_inputs[-1])
 
         results = self.network.feedforward(input)
-        proba_results = results / sum(results)
-        cumulative_proba = cumsum(proba_results)
+        cumulative_proba = cumsum(results)
 
         rand = uniform(0, 1)
         action = searchsorted(cumulative_proba, rand)
