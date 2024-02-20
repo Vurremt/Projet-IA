@@ -62,6 +62,22 @@ class Sigmoid:
     def save(self, file):
         pass
 
+class ReLU:
+    def __init__(self):
+        pass
+
+    def feedforward(self, X):
+        return numpy.where(X <= 0, 0, X)
+
+    def backpropagation(self, X, gradient_Y):
+        return gradient_Y * numpy.where(X <= 0, 0, 1)
+
+    def update(self, learning_rate):
+        pass # Nothing to do
+
+    def save(self, file):
+        pass
+
 # Marche peut etre, pas sur, à n'utiliser qu'avec plus de 1 sortie
 class Softmax:
     def __init__(self):
@@ -71,9 +87,10 @@ class Softmax:
         e_x = numpy.exp(X - numpy.max(X))
         return e_x / e_x.sum(axis=0)
 
-    def backpropagation(self, X, gradient_Y):
+    def backpropagation(self, X, gain):
         s = self.feedforward(X)
         S = numpy.diagflat(s) - numpy.outer(s, s)
+        gradient_Y = - gain * numpy.log(s + 1e-8)
         gradient_X = numpy.dot(S, gradient_Y)
         return gradient_X
 
@@ -93,7 +110,7 @@ class Proba_output:
 
     def backpropagation(self, X, gain):
         results = X / sum(X)
-        return - gain * numpy.log(results)
+        return - gain * numpy.log(results + 1e-8)
 
     def update(self, learning_rate):
         pass  # Nothing to do
@@ -155,6 +172,8 @@ class Network:
                     line += "L "
                 elif type(l) == Sigmoid:
                     line += "S "
+                elif type(l) == ReLU:
+                    line += "R "
                 elif type(l) == Softmax:
                     line += "M "
                 elif type(l) == Proba_output:
@@ -173,6 +192,9 @@ class Network:
             for l in layers :
                 if l == "S" :
                     self.addLayer(Sigmoid())
+
+                elif l == "R":
+                    self.addLayer(ReLU())
 
                 elif l == "M":
                     self.addLayer(Softmax())
@@ -235,7 +257,7 @@ class Network_RL (Network):
 
     def update_all_states(self, final_reward, factor, learning_rate):
         self.calcul_gain(final_reward, factor)
-        for i in range(len(self.states_inputs)):
+        for i in reversed(range(len(self.states_inputs))):
             self.feedforward(self.states_inputs[i])
             self.backpropagation(self.states_rewards[i])
             self.update(learning_rate)
