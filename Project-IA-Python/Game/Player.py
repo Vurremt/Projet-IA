@@ -34,3 +34,27 @@ class AIPlayer(Player):
         action = searchsorted(cumulative_proba, rand)
         return action + 1  # +1 for being between 1 and 7
 
+    def play_one_action_random(self, grid):
+        input = ravel(grid)
+        self.network.add_state(0, input)
+
+        return randint(1, 7)
+
+class AIPlayerLabyrinth(Player):
+    def __init__(self, name, network):
+        super().__init__(name)
+        self.network = network
+
+    def play_one_action(self, views):
+
+        results = self.network.feedforward(views)
+        cumulative_proba = cumsum(results)
+
+        rand = uniform(0, 1)
+        action = searchsorted(cumulative_proba, rand)
+        return action
+
+    def play_one_action_random(self, views):
+        self.network.feedforward(views)
+        return randint(0, 3)
+

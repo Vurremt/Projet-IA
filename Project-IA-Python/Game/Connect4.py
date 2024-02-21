@@ -25,6 +25,9 @@ class Connect4:
     def recup_action(self, player):
         return player.play_one_action(self.grid)
 
+    def recup_action_random(self, player):
+        return player.play_one_action_random(self.grid)
+
     def displayGrid(self):
         print("--1-2-3-4-5-6-7--")
         for i in range(self.grid.shape[0]):
@@ -127,14 +130,17 @@ class Connect4:
 
 
 class Connect4Training(Connect4):
-    def play_one_turn_training(self):
+    def play_one_turn_training(self, epsilon):
         self.round += 1
         if (self.round + 1) % 2 == 0:
             current_player = self.player1
         else:
             current_player = self.player2
 
-        input_player = self.recup_action(current_player) - 1
+        if uniform(0, 1) <= epsilon:
+            input_player = self.recup_action_random(current_player) - 1
+        else:
+            input_player = self.recup_action(current_player) - 1
         if self.full_col(input_player) :
             free_col = list()
             for i in range(len(self.current_col)):
@@ -147,11 +153,11 @@ class Connect4Training(Connect4):
         elif self.full_grid() : return 3
         else : return 0
 
-    def game_loop_training(self):
+    def game_loop_training(self, epsilon):
         winner = 0
 
         while winner == 0:
-            winner = self.play_one_turn_training()
+            winner = self.play_one_turn_training(epsilon)
 
         return winner, self.round
 
@@ -161,12 +167,14 @@ def play_game_vs_random(player_ai, nb_games):
     lose = 0
     win = 0
     draw = 0
+    nb_round = 0
     game = Connect4Training(None, None)
     player_random = RandomPlayer("Rand")
     for i in range(nb_games):
         if randint(0, 1) == 1:
             game.reset_game(player_ai, player_random)
-            winner, round = game.game_loop_training()
+            winner, round = game.game_loop_training(0)
+            nb_round += round
             if winner == 1 :
                 win += 1
             if winner == 2 :
@@ -175,22 +183,23 @@ def play_game_vs_random(player_ai, nb_games):
                 draw += 1
         else:
             game.reset_game(player_random, player_ai)
-            winner, round = game.game_loop_training()
+            winner, round = game.game_loop_training(0)
+            nb_round += round
             if winner == 1:
                 lose += 1
             if winner == 2:
                 win += 1
             if winner == 3:
                 draw += 1
-    print(f"Win rate = {int((win / (win + lose + draw)) * 100)}%")
+    print(f"Win rate = {int((win / (win + lose + draw)) * 100)}%, average rounds = {nb_round/nb_games}")
     del player_random
     del game
 
 
-def fit_game(player_1, player_2, nb_games, factor, start_learning_rate, end_learning_rate, step_learning_rate):
+def fit_game(player_1, player_2, nb_games, factor, learning_rate, start_epsilon, end_epsilon, step_epsilon):
 
-    learning_rate = start_learning_rate
     game = Connect4Training(None, None)
+    epsilon = start_epsilon
 
     for i in range(nb_games+1):
         player_1.network.clear_states()
@@ -198,7 +207,7 @@ def fit_game(player_1, player_2, nb_games, factor, start_learning_rate, end_lear
         if randint(0, 1) == 1:
 
             game.reset_game(player_1, player_2)
-            winner, round = game.game_loop_training()
+            winner, round = game.game_loop_training(epsilon)
 
             reward = (round - 7) * -0.014
             if winner == 1:
@@ -216,7 +225,7 @@ def fit_game(player_1, player_2, nb_games, factor, start_learning_rate, end_lear
         else:
 
             game.reset_game(player_2, player_1)
-            winner, round = game.game_loop_training()
+            winner, round = game.game_loop_training(epsilon)
 
             reward = (round - 7) * -0.014
             if winner == 1:
@@ -233,16 +242,16 @@ def fit_game(player_1, player_2, nb_games, factor, start_learning_rate, end_lear
 
         if i % 10000 == 0:
             print(f"--------------------\n{i} games played")
-            player_1.network.save("../save_brain/player1_{0}iter_{1:.2f}lr.txt".format(i, learning_rate))
-            player_2.network.save("../save_brain/player2_{0}iter_{1:.2f}lr.txt".format(i, learning_rate))
+            player_1.network.save("../save_brain/player1_{0}iter_{1:.2f}epsi.txt".format(i, epsilon))
+            player_2.network.save("../save_brain/player2_{0}iter_{1:.2f}espi.txt".format(i, epsilon))
             print("Player 1 ", end = '')
-            play_game_vs_random(player_1, 100)
+            play_game_vs_random(player_1, 1000)
             print("Player 2 ", end='')
-            play_game_vs_random(player_2, 100)
+            play_game_vs_random(player_2, 1000)
             print()
 
-        if learning_rate > end_learning_rate:
-            learning_rate -= step_learning_rate
+        if epsilon > end_epsilon:
+            epsilon -= step_epsilon
 
     del game
 
@@ -260,25 +269,22 @@ player_1 = AIPlayer("P1", model)
 
 model2 = Network_RL()
 model2.addLayer( Linear(42, 50) )
-model2.addLayer( Sigmoid() )
+model2.addLayer( ReLU() )
 model2.addLayer( Linear(50, 50 ))
-model2.addLayer( Sigmoid() )
 model2.addLayer( Linear(50, 50 ))
-model2.addLayer( Sigmoid() )
 model2.addLayer( Linear(50, 50 ))
-model2.addLayer( Sigmoid() )
 model2.addLayer( Linear(50, 7 ))
-model2.addLayer( Sigmoid() )
+model2.addLayer( ReLU() )
 model2.addLayer( Softmax() )
 player_2 = AIPlayer("P2", model2)
 
-fit_game(player_1, player_2, 100000, 1, 0.95, 0.05, 0.00001)
+fit_game(player_1, player_2, 150000, 0.5, 0.5,0.95, 0.05, 0.00001)
 
 """
 player1 = HumanPlayer("Evahn")
 model = Network_RL()
 player_2 = AIPlayer("P2", model)
-player_2.network.load("../save_brain/player1_100000iter_0.05lr.txt")
+player_2.network.load("../save_brain/player1_150000iter_0.05epsi.txt")
 
 game = Connect4(player1, player_2)
 game.game_loop()
